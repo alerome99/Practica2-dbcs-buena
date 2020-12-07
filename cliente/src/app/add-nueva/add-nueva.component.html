@@ -1,0 +1,74 @@
+<body>
+  <!-- El atributo mensaje se usara para mostrar avisos al empleado, por ejemplo
+         el resultado de una operacion -->
+  <h1>Bienvenido</h1>
+  <form action="controladorNuevaConfiguracion" name="ejemplo" method="post">
+    <h2>Rellene configuracion</h2>
+    Id configuracion (solo para editar):
+    <input type="text" name="idConf" /><br /><br />
+    velocidad CPU: <input type="text" name="velocidad" /><br /><br />
+    Capacidad RAM: <input type="text" name="ram" /><br /><br />
+    Capadidad DD: <input type="text" name="dd" /><br /><br />
+    Memoria tarjeta gráfica: <input type="text" name="memGraf" /><br /><br />
+    Velocidad tarjeta gráfica: <input type="text" name="velGraf" /><br /><br />
+    <h2>Tipo CPU</h2>
+    <input type="radio" name="tipoCPU" value="1" />AMD<br />
+    <input type="radio" name="tipoCPU" value="2" checked />Intel<br />
+    <h2>Escoja Componentes (Solo Nueva)</h2>
+    <mat-table #table [dataSource]="dataSource">
+
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <mat-header-cell *matHeaderCellDef>
+          <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()"
+                        (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)">
+          </mat-checkbox>
+        </mat-cell>
+      </ng-container>
+  
+      <!-- Position Column -->
+      <ng-container matColumnDef="tipo">
+        <mat-header-cell *matHeaderCellDef> Tipo </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.tipo}} </mat-cell>
+      </ng-container>
+  
+      <!-- Name Column -->
+      <ng-container matColumnDef="marca">
+        <mat-header-cell *matHeaderCellDef> Marca </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.marca}} </mat-cell>
+      </ng-container>
+  
+      <!-- Weight Column -->
+      <ng-container matColumnDef="modelo">
+        <mat-header-cell *matHeaderCellDef> Modelo </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.modelo}} </mat-cell>
+      </ng-container>
+  
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"
+               (click)="selection.toggle(row)">
+      </mat-row>
+    </mat-table>
+    <br /><br />
+
+    <input
+      type="submit"
+      value="Nueva Configuracion"
+      name="envioNC"
+    /><br /><br />
+    <input
+      type="submit"
+      value="Editar Configuracion"
+      name="envioEC"
+    /><br /><br />
+    <input type="reset" value="Vaciar" />
+    <input type="submit" value="Salir" name="envioSalir" /><br /><br />
+  </form>
+</body>
