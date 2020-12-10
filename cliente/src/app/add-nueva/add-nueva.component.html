@@ -2,15 +2,26 @@
   <!-- El atributo mensaje se usara para mostrar avisos al empleado, por ejemplo
          el resultado de una operacion -->
   <h1>Bienvenido</h1>
-  <form action="controladorNuevaConfiguracion" name="ejemplo" method="post">
+  <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
     <h2>Rellene configuracion</h2>
-    Id configuracion (solo para editar):
-    <input type="text" name="idConf" /><br /><br />
-    velocidad CPU: <input type="text" name="velocidad" /><br /><br />
-    Capacidad RAM: <input type="text" name="ram" /><br /><br />
-    Capadidad DD: <input type="text" name="dd" /><br /><br />
-    Memoria tarjeta gráfica: <input type="text" name="memGraf" /><br /><br />
-    Velocidad tarjeta gráfica: <input type="text" name="velGraf" /><br /><br />
+    Id configuracion (para editar y borrar):
+    <input type="text" class="form-control" [disabled]="idconfiguracion ? true : false" [required]="idconfiguracion ? false : true"
+ [(ngModel)]="conf.idconfiguracion" name="idConf"><br /><br />
+    velocidad CPU: 
+    <input type="text" class="form-control" [disabled]="idconfiguracion ? true : false" [required]="idconfiguracion ? false : true"
+ [(ngModel)]="conf.velocidadcpu" name="velConf"><br /><br />
+    Capacidad RAM: 
+    <input type="text" class="form-control" [disabled]="idconfiguracion ? true : false" [required]="idconfiguracion ? false : true"
+ [(ngModel)]="conf.capacidadram" name="velConf"><br /><br />
+    Capadidad DD: 
+    <input type="text" class="form-control" [disabled]="idconfiguracion ? true : false" [required]="idconfiguracion ? false : true"
+ [(ngModel)]="conf.capacidaddd" name="velConf"><br /><br />
+    Memoria tarjeta gráfica: 
+    <input type="text" class="form-control" [disabled]="idconfiguracion ? true : false" [required]="idconfiguracion ? false : true"
+ [(ngModel)]="conf.velocidadtarjetagrafica" name="velConf"><br /><br />
+    Velocidad tarjeta gráfica: 
+    <input type="text" class="form-control" [disabled]="idconfiguracion ? true : false" [required]="idconfiguracion ? false : true"
+ [(ngModel)]="conf.memoriatarjetagrafica" name="velConf"><br /><br />
     <h2>Tipo CPU</h2>
     <input type="radio" name="tipoCPU" value="1" />AMD<br />
     <input type="radio" name="tipoCPU" value="2" checked />Intel<br />
@@ -67,6 +78,11 @@
       type="submit"
       value="Editar Configuracion"
       name="envioEC"
+    /><br /><br />
+    <input
+      type="submit"
+      value="Eliminar Configuracion"
+      name="envioBC"
     /><br /><br />
     <input type="reset" value="Vaciar" />
     <input type="submit" value="Salir" name="envioSalir" /><br /><br />

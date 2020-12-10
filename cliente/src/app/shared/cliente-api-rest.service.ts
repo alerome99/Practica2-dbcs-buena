@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
-import { Login, Usuario } from './app.model';
+import { Configuracionpc, Login, Usuario } from './app.model';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -19,5 +19,10 @@ export class ClienteApiRestService {
         Password: password
       })
     });
+  }
+
+  addConfiguracion(configuracionpc: Configuracionpc): Observable<HttpResponse<any>> {
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores';
+    return this.http.post<Configuracionpc>(url, configuracionpc, { observe: 'response'});
   }
 }

@@ -30,7 +30,7 @@ public class UsuarioFacade extends AbstractFacade<Usuario> implements UsuarioFac
 
     @Override
     public Usuario getUsuarioUserPassword(String nifcif, String password) {
-        return (Usuario) em.createNamedQuery("Usuario.findByUserPassword").setParameter(2, nifcif).setParameter(1, password);
+        return (Usuario) em.createNamedQuery("Usuario.findByUserPassword").setParameter(1, nifcif).setParameter(2, password).getResultList().get(0);
     }
     
 }
