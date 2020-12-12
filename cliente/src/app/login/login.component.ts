@@ -37,7 +37,7 @@ export class LoginComponent implements OnInit {
     this.clienteApiRest.getLogin(nifcif, pass).subscribe(
       resp => {
         //this.session.setLoggedIn(resp.nif);
-        this.route.navigate(['/add']);
+        this.route.navigate(['/configuraciones']);
       },
       err => {
         if (err.status === 401) {

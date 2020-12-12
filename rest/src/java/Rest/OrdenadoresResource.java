@@ -12,10 +12,12 @@ import Persistencia.ConfiguracionpcFacadeLocal;
 import Persistencia.EmpleadoFacadeLocal;
 import Persistencia.UsuarioFacadeLocal;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -23,6 +25,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Produces;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -59,11 +62,36 @@ public class OrdenadoresResource implements ContainerResponseFilter{
      * Retrieves representation of an instance of Rest.OrdenadoresResource
      * @return an instance of java.lang.String
      */
+    
     @GET
     @Produces("application/json")
-    public String getJson() {
-        //TODO return proper representation object
-        throw new UnsupportedOperationException();
+    public Response getConfiguraciones() {
+        Response.ResponseBuilder respuesta = Response.status(Response.Status.ACCEPTED);
+        List<Configuracionpc> confs = configuracionpcFacade.findAll();
+        if (confs == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        Configuracionpc[] arrayConfiguracion = new Configuracionpc[confs.size()];
+        for (int i = 0; i < arrayConfiguracion.length; i++) {
+            arrayConfiguracion[i] = confs.get(i);
+        }
+        respuesta.entity(arrayConfiguracion); // Añadimos el cuerpo (contenido) de la respuesta
+        return respuesta.build();
+    }
+    
+    @Path("/{id}/conf")
+    @GET
+    @Produces("application/json")
+    public Response getConfiguracion(@PathParam("id") int id) {
+        Response.ResponseBuilder respuesta = Response.status(Response.Status.ACCEPTED);
+        try {
+            Configuracionpc conf = (Configuracionpc) configuracionpcFacade.find(id);      
+            respuesta.entity(conf);
+            return respuesta.build();
+        } catch (Exception e) {
+            respuesta.status(Response.Status.INTERNAL_SERVER_ERROR);
+            return respuesta.build();
+        }
     }
     
     @GET
@@ -84,6 +112,40 @@ public class OrdenadoresResource implements ContainerResponseFilter{
         }
     }
     
+    @Path("{id}")
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    // No seria necesario el parametro de la URL id, ya que el objeto Json lo tiene. Se hace de esta manera
+    //para mostrar como mezclar un “consumo” del cuerpo de la peticion (objeto Json) y parámetro de la URL
+    public Response modificarConfiguracion(JsonObject confModif, @PathParam("id") int id) {
+        Response.ResponseBuilder respuesta = Response.noContent();
+        try {
+            Configuracionpc conf = configuracionpcFacade.find(id);
+            conf.setTipocpu(confModif.getString("tipocpu"));
+            conf.setCapacidaddd(confModif.getInt("capacidaddd"));
+            conf.setCapacidadram(confModif.getInt("capacidadram"));
+            conf.setMemoriatarjetagrafica(confModif.getInt("memoriatarjetagrafica"));
+            conf.setVelocidadtarjetagrafica(confModif.getInt("velocidadtarjetagrafica"));
+            conf.setVelocidadcpu(confModif.getInt("velocidadcpu"));
+            JsonNumber jn = confModif.getJsonNumber("precio");
+            String pre = jn.toString();
+            Float precio = Float.parseFloat(pre);
+            conf.setPrecio(precio);
+            /*
+            if(conf.getPrecio()!=Float.parseFloat(confModif.getString("precio"))){
+                conf.setPrecio(Float.parseFloat(confModif.getString("precio")));
+            }*/
+            //if(conf.getIdconfiguracion()!=)
+            configuracionpcFacade.edit(conf);
+            respuesta.status(Response.Status.NO_CONTENT);
+            return respuesta.build();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            respuesta.status(Response.Status.INTERNAL_SERVER_ERROR);
+            return respuesta.build();
+        }
+    }
+    
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addConfiguracionpc(JsonObject conf) {
@@ -91,20 +153,22 @@ public class OrdenadoresResource implements ContainerResponseFilter{
         try {
             //System.out.println(conf.getInt("velocidadcpu"));
            // System.out.println(Integer.parseInt(conf.getString("velocidadcpu")));
-            //System.out.println(conf.toString());
             Configuracionpc newConf = new Configuracionpc();
-            
             newConf.setTipocpu(conf.getString("tipocpu"));
-            newConf.setVelocidadcpu(Integer.parseInt(conf.getString("velocidadcpu")));
-            newConf.setCapacidadram(Integer.parseInt(conf.getString("capacidadram")));
-            newConf.setCapacidaddd(Integer.parseInt(conf.getString("capacidaddd")));
-            newConf.setVelocidadtarjetagrafica(Integer.parseInt(conf.getString("velocidadtarjetagrafica")));
-            newConf.setMemoriatarjetagrafica(Integer.parseInt(conf.getString("memoriatarjetagrafica")));
-            newConf.setPrecio(0);
+            newConf.setIdconfiguracion(conf.getInt("idconfiguracion"));
+            newConf.setVelocidadcpu(conf.getInt("velocidadcpu"));
+            newConf.setCapacidadram(conf.getInt("capacidadram"));
+            newConf.setCapacidaddd(conf.getInt("capacidaddd"));
+            newConf.setVelocidadtarjetagrafica(conf.getInt("velocidadtarjetagrafica"));
+            newConf.setMemoriatarjetagrafica(conf.getInt("memoriatarjetagrafica"));
+            JsonNumber jn = conf.getJsonNumber("precio");
+            String pre = jn.toString();
+            Float precio = Float.parseFloat(pre);
+            newConf.setPrecio(precio);
             
             //int id = 1000 * conf.getInt("velocidadcpu") + 100 * conf.getInt("capacidadram") + 10 * conf.getInt("capacidaddd") 
                     //+ conf.getInt("velocidadtarjetagrafica") + conf.getInt("memoriatarjetagrafica");
-            newConf.setIdconfiguracion(16);
+            //newConf.setIdconfiguracion(16);
             List<Pedidopc> lista = new ArrayList<>();
             newConf.setPedidopcList(lista);
             
@@ -121,6 +185,21 @@ public class OrdenadoresResource implements ContainerResponseFilter{
             return respuesta.build();
         } catch (Exception e) {
             System.err.println(e.getMessage());
+            respuesta.status(Response.Status.INTERNAL_SERVER_ERROR);
+            return respuesta.build();
+        }
+    }
+    
+    @Path("borrar/{id}")
+    @DELETE
+    public Response borrarConfiguracion(@PathParam("id") int id) {
+        Response.ResponseBuilder respuesta = Response.noContent();
+        try {
+            Configuracionpc conf = (Configuracionpc) configuracionpcFacade.find(id);
+            configuracionpcFacade.remove(conf);     
+            respuesta.status(Response.Status.NO_CONTENT);
+            return respuesta.build();
+        } catch (Exception e) {
             respuesta.status(Response.Status.INTERNAL_SERVER_ERROR);
             return respuesta.build();
         }

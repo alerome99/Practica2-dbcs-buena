@@ -13,12 +13,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ClienteApiRestService } from './shared/cliente-api-rest.service';
 import { DataService } from './shared/data.service';
 import { HttpClientModule } from '@angular/common/http';
+import { ConfiguracionListaComponent } from './configuracion-lista/configuracion-lista.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
-    AddNuevaComponent
+    AddNuevaComponent,
+    ConfiguracionListaComponent
   ],
   imports: [
     BrowserModule,

@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, SystemJsNgModuleLoader } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Configuracionpc } from '../shared/app.model';
 import { DataService } from '../shared/data.service';
-import { Router,ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ClienteApiRestService } from '../shared/cliente-api-rest.service';
 
 /**
@@ -23,13 +23,33 @@ export class AddNuevaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.ruta.paramMap.subscribe(
-      params => {
-        this.idconfiguracion = params.get('idconfiguracion');
-      },
-      err => console.log("Error al leer id para editar: " + err)
-    )    
+    console.log('En editar-vino');
+    console.log(this.ruta.snapshot.url[this.ruta.snapshot.url.length - 1].path);
+    this.operacion = this.ruta.snapshot.url[
+      this.ruta.snapshot.url.length - 1
+    ].path; // Operacion: ultimo string de la URL
+    if (this.operacion == 'editar') {
+      // Si la operacion es editar se captura el id del registro y se trae el json con el vino
+      console.log('En Editar');
+      this.ruta.paramMap.subscribe(
+        (params) => {
+          this.idconfiguracion = params.get('id');
+        },
+        (err) => console.log('Error al leer id para editar: ' + err)
+      );
+      console.log('Id: ' + this.idconfiguracion);
+      this.clienteApiRest.getConfiguracion(this.idconfiguracion).subscribe(
+        (resp) => {
+          this.configuracion = resp.body;
+        },
+        (err) => {
+          console.log('Error al traer el vino: ' + err.message);
+          throw err;
+        }
+      );
+    }
   }
+
   displayedColumns = ['select', 'tipo', 'marca', 'modelo'];
   dataSource = new MatTableDataSource<Element>(ELEMENT_DATA);
   selection = new SelectionModel<Element>(true, []);
@@ -42,35 +62,61 @@ export class AddNuevaComponent implements OnInit {
 
   conf = {
     idconfiguracion: 0,
-    tipocpu: '1',
+    tipocpu: '',
     velocidadcpu: 0,
     capacidadram: 0,
     capacidaddd: 0,
     velocidadtarjetagrafica: 0,
     memoriatarjetagrafica: 0,
-    precio: 0,
+    precio: 0.0,
   };
   configuracion = this.conf as Configuracionpc;
-  idconfiguracion: String; 
+  idconfiguracion: String;
+  operacion: String;
   onSubmit() {
     console.log('Enviado formulario');
-    // Parte añadir configuracion
-    this.clienteApiRest.addConfiguracion(this.configuracion).subscribe(
-      (resp) => {
-        if (resp.status < 400) {
-          this.datos.cambiarMostrarMensaje(true);
-          this.datos.cambiarMensaje('Configuracion añadida con exito');
-        } else {
-          this.datos.cambiarMostrarMensaje(true);
-          this.datos.cambiarMensaje('Error al añadir la configuracion');
+    console.log('esta es la conf' + this.configuracion.capacidaddd);
+    if (this.idconfiguracion) {
+      this.clienteApiRest
+        .modificarConfiguracion(
+          String(this.configuracion.idconfiguracion),
+          this.configuracion
+        )
+        .subscribe(
+          (resp) => {
+            if (resp.status < 400) {
+              this.datos.cambiarMostrarMensaje(true);
+              this.datos.cambiarMensaje('Configuracion modificada con exito');
+            } else {
+              this.datos.cambiarMostrarMensaje(true);
+              this.datos.cambiarMensaje('Error al modificar configuracion');
+            }
+            this.route.navigate(['configuraciones']); 
+          },
+          (err) => {
+            console.log('Error editar: ' + err.message);
+            throw err;
+          }
+        );
+    } else {
+      console.log(this.idconfiguracion);
+      this.clienteApiRest.addConfiguracion(this.configuracion).subscribe(
+        (resp) => {
+          if (resp.status < 400) {
+            this.datos.cambiarMostrarMensaje(true);
+            this.datos.cambiarMensaje('Configuracion añadida con exito');
+          } else {
+            this.datos.cambiarMostrarMensaje(true);
+            this.datos.cambiarMensaje('Error al añadir la configuracion');
+          }
+          this.route.navigate(['configuraciones']);
+        },
+        (err) => {
+          console.log('Error al añadir: ' + err.message);
+          throw err;
         }
-        this.route.navigate(['add']);
-      },
-      (err) => {
-        console.log('Error al añadir: ' + err.message);
-        throw err;
-      }
-    );
+      );
+    }
   }
 
   /** Selects all rows if they are not all selected; otherwise clear selection. */
