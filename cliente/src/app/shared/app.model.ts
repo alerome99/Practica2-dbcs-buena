@@ -53,3 +53,11 @@ export interface Pedidopc{
 export interface Login{
     password:String
 }
+
+export interface Pais{
+    pais:String
+}
+
+export interface Conversion{
+    factor:Number
+}

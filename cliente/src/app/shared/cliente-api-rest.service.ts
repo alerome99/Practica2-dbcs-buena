@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
-import { Configuracionpc, Login, Usuario } from './app.model';
+import { Configuracionpc, Login, Pais, Usuario } from './app.model';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -9,11 +9,13 @@ import { Observable } from 'rxjs';
 export class ClienteApiRestService {
 
   private static readonly BASE_URI = 'http://localhost:8080/Practica2/webresources';
+  private usuario : string;
 
   constructor(private http: HttpClient) { }
 
   getLogin(user: string, password: string): Observable<Login> {
     let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + user;
+    this.usuario = user;
     return this.http.get<Login>(url, {
       headers: new HttpHeaders({
         Password: password
@@ -21,13 +23,18 @@ export class ClienteApiRestService {
     });
   }
 
-  addConfiguracion(configuracionpc: Configuracionpc): Observable<HttpResponse<any>> {
-    let url = ClienteApiRestService.BASE_URI + '/ordenadores';
+  getPais(): Observable<HttpResponse<Pais>>{
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + this.usuario + '/pais';
+    return this.http.get<Pais>(url, { observe: 'response' });
+  }
+
+  addConfiguracion(configuracionpc: Configuracionpc, f: Number): Observable<HttpResponse<any>> {
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + f;
     return this.http.post<Configuracionpc>(url, configuracionpc, { observe: 'response'});
   }
 
-  modificarConfiguracion(id: String, configuracionpc: Configuracionpc): Observable<HttpResponse<any>> {
-    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + id;
+  modificarConfiguracion(id: String, configuracionpc: Configuracionpc, f: Number): Observable<HttpResponse<any>> {
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + id + '/' + f;
     return this.http.put<Configuracionpc>(url, configuracionpc, { observe: 'response'});
   }
 

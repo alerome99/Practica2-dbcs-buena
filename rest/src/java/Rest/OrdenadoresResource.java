@@ -107,17 +107,36 @@ public class OrdenadoresResource implements ContainerResponseFilter{
             if(empleadoFacade.find(username)==null){
                 return Response.status(Response.Status.UNAUTHORIZED).build();
             }else{
-                return Response.status(Response.Status.OK).build();
+                return Response.status(Response.Status.ACCEPTED).build();
             }
         }
     }
     
-    @Path("{id}")
+    @GET
+    @Path("/{user}/pais")
+    @Produces("application/json")
+    public Response getPais(@PathParam("user") String username) {
+        Response.ResponseBuilder respuesta = Response.status(Response.Status.ACCEPTED);
+        try {
+            Usuario user = (Usuario) usuarioFacade.find(username);   
+            String pais = "{ \"pais\":\"" + user.getPais() + "\" }";
+            respuesta.entity(pais);
+            System.out.println(respuesta);
+            System.out.println(pais);
+            return respuesta.build();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            respuesta.status(Response.Status.INTERNAL_SERVER_ERROR);
+            return respuesta.build();
+        }
+    }
+    
+    @Path("{id}/{precio}")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     // No seria necesario el parametro de la URL id, ya que el objeto Json lo tiene. Se hace de esta manera
     //para mostrar como mezclar un “consumo” del cuerpo de la peticion (objeto Json) y parámetro de la URL
-    public Response modificarConfiguracion(JsonObject confModif, @PathParam("id") int id) {
+    public Response modificarConfiguracion(JsonObject confModif, @PathParam("id") int id, @PathParam("precio") float factor) {
         Response.ResponseBuilder respuesta = Response.noContent();
         try {
             Configuracionpc conf = configuracionpcFacade.find(id);
@@ -130,7 +149,9 @@ public class OrdenadoresResource implements ContainerResponseFilter{
             JsonNumber jn = confModif.getJsonNumber("precio");
             String pre = jn.toString();
             Float precio = Float.parseFloat(pre);
-            conf.setPrecio(precio);
+            if(precio!= conf.getPrecio()){
+                conf.setPrecio(precio * factor);
+            }
             /*
             if(conf.getPrecio()!=Float.parseFloat(confModif.getString("precio"))){
                 conf.setPrecio(Float.parseFloat(confModif.getString("precio")));
@@ -146,9 +167,10 @@ public class OrdenadoresResource implements ContainerResponseFilter{
         }
     }
     
+    @Path("{precio}")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addConfiguracionpc(JsonObject conf) {
+    public Response addConfiguracionpc(JsonObject conf, @PathParam("precio") float factor) {
         Response.ResponseBuilder respuesta = Response.noContent();
         try {
             //System.out.println(conf.getInt("velocidadcpu"));
@@ -163,7 +185,7 @@ public class OrdenadoresResource implements ContainerResponseFilter{
             newConf.setMemoriatarjetagrafica(conf.getInt("memoriatarjetagrafica"));
             JsonNumber jn = conf.getJsonNumber("precio");
             String pre = jn.toString();
-            Float precio = Float.parseFloat(pre);
+            Float precio = Float.parseFloat(pre) * factor;
             newConf.setPrecio(precio);
             
             //int id = 1000 * conf.getInt("velocidadcpu") + 100 * conf.getInt("capacidadram") + 10 * conf.getInt("capacidaddd") 
