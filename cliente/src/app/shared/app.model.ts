@@ -34,7 +34,7 @@ export interface Configuracionpc{
     capacidaddd:Number,
     velocidadtarjetagrafica:Number,
     memoriatarjetagrafica:Number,
-    precio:Number
+    precio:number
 }
 
 export interface Estadoventapcs{
@@ -59,5 +59,5 @@ export interface Pais{
 }
 
 export interface Conversion{
-    factor:Number
+    dineroconvertido:number
 }

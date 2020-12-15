@@ -10,9 +10,9 @@ import { Router } from '@angular/router';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit {
-  User: Usuario | undefined;
-  mostrarMensaje: boolean | undefined;
-  mensaje: string | undefined;
+  User: Usuario ;
+  mostrarMensaje: boolean ;
+  mensaje: string ;
 
   constructor(
     private clienteApiRest: ClienteApiRestService,
@@ -34,15 +34,17 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     let nifcif = (document.getElementById('nif') as HTMLInputElement).value;
     let pass = (document.getElementById('pass') as HTMLInputElement).value;
+    if(nifcif===''){
+      nifcif='0';
+    }
     this.clienteApiRest.getLogin(nifcif, pass).subscribe(
       resp => {
-        //this.session.setLoggedIn(resp.nif);
         this.route.navigate(['/configuraciones']);
+        console.log('Sesion inicia de manera correcta con usuario: ' + nifcif);
       },
       err => {
-        if (err.status === 401) {
-          console.log('Usuario incorrecto');
-        }
+        console.log('Usuario incorrecto: ' + err.message);
+        throw err;
       }
     );
   }

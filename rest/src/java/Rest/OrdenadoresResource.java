@@ -12,7 +12,6 @@ import Persistencia.ConfiguracionpcFacadeLocal;
 import Persistencia.EmpleadoFacadeLocal;
 import Persistencia.UsuarioFacadeLocal;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -66,7 +65,7 @@ public class OrdenadoresResource implements ContainerResponseFilter{
     @GET
     @Produces("application/json")
     public Response getConfiguraciones() {
-        Response.ResponseBuilder respuesta = Response.status(Response.Status.ACCEPTED);
+        Response.ResponseBuilder respuesta = Response.status(Response.Status.OK);
         List<Configuracionpc> confs = configuracionpcFacade.findAll();
         if (confs == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -83,7 +82,7 @@ public class OrdenadoresResource implements ContainerResponseFilter{
     @GET
     @Produces("application/json")
     public Response getConfiguracion(@PathParam("id") int id) {
-        Response.ResponseBuilder respuesta = Response.status(Response.Status.ACCEPTED);
+        Response.ResponseBuilder respuesta = Response.status(Response.Status.OK);
         try {
             Configuracionpc conf = (Configuracionpc) configuracionpcFacade.find(id);      
             respuesta.entity(conf);
@@ -99,15 +98,15 @@ public class OrdenadoresResource implements ContainerResponseFilter{
     @Produces("application/json")
     public Response getUserLogin(@PathParam("login") String username,
             @Context HttpHeaders headers) { 
-        String password = headers.getRequestHeader("Password").get(0);
-        Usuario user = usuarioFacade.getUsuarioUserPassword(username, password);
+        String authorization = headers.getRequestHeader("Authorization").get(0);
+        Usuario user = usuarioFacade.getUsuarioUserPassword(username, authorization);
         if(user==null){
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }else{
             if(empleadoFacade.find(username)==null){
                 return Response.status(Response.Status.UNAUTHORIZED).build();
             }else{
-                return Response.status(Response.Status.ACCEPTED).build();
+                return Response.status(Response.Status.OK).build();
             }
         }
     }
@@ -116,13 +115,11 @@ public class OrdenadoresResource implements ContainerResponseFilter{
     @Path("/{user}/pais")
     @Produces("application/json")
     public Response getPais(@PathParam("user") String username) {
-        Response.ResponseBuilder respuesta = Response.status(Response.Status.ACCEPTED);
+        Response.ResponseBuilder respuesta = Response.status(Response.Status.OK);
         try {
             Usuario user = (Usuario) usuarioFacade.find(username);   
             String pais = "{ \"pais\":\"" + user.getPais() + "\" }";
             respuesta.entity(pais);
-            System.out.println(respuesta);
-            System.out.println(pais);
             return respuesta.build();
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -131,12 +128,10 @@ public class OrdenadoresResource implements ContainerResponseFilter{
         }
     }
     
-    @Path("{id}/{precio}")
+    @Path("{id}")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    // No seria necesario el parametro de la URL id, ya que el objeto Json lo tiene. Se hace de esta manera
-    //para mostrar como mezclar un “consumo” del cuerpo de la peticion (objeto Json) y parámetro de la URL
-    public Response modificarConfiguracion(JsonObject confModif, @PathParam("id") int id, @PathParam("precio") float factor) {
+    public Response modificarConfiguracion(JsonObject confModif, @PathParam("id") int id) {
         Response.ResponseBuilder respuesta = Response.noContent();
         try {
             Configuracionpc conf = configuracionpcFacade.find(id);
@@ -149,14 +144,7 @@ public class OrdenadoresResource implements ContainerResponseFilter{
             JsonNumber jn = confModif.getJsonNumber("precio");
             String pre = jn.toString();
             Float precio = Float.parseFloat(pre);
-            if(precio!= conf.getPrecio()){
-                conf.setPrecio(precio * factor);
-            }
-            /*
-            if(conf.getPrecio()!=Float.parseFloat(confModif.getString("precio"))){
-                conf.setPrecio(Float.parseFloat(confModif.getString("precio")));
-            }*/
-            //if(conf.getIdconfiguracion()!=)
+            conf.setPrecio(precio);
             configuracionpcFacade.edit(conf);
             respuesta.status(Response.Status.NO_CONTENT);
             return respuesta.build();
@@ -167,14 +155,11 @@ public class OrdenadoresResource implements ContainerResponseFilter{
         }
     }
     
-    @Path("{precio}")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addConfiguracionpc(JsonObject conf, @PathParam("precio") float factor) {
+    public Response addConfiguracionpc(JsonObject conf) {
         Response.ResponseBuilder respuesta = Response.noContent();
         try {
-            //System.out.println(conf.getInt("velocidadcpu"));
-           // System.out.println(Integer.parseInt(conf.getString("velocidadcpu")));
             Configuracionpc newConf = new Configuracionpc();
             newConf.setTipocpu(conf.getString("tipocpu"));
             newConf.setIdconfiguracion(conf.getInt("idconfiguracion"));
@@ -185,23 +170,10 @@ public class OrdenadoresResource implements ContainerResponseFilter{
             newConf.setMemoriatarjetagrafica(conf.getInt("memoriatarjetagrafica"));
             JsonNumber jn = conf.getJsonNumber("precio");
             String pre = jn.toString();
-            Float precio = Float.parseFloat(pre) * factor;
+            Float precio = Float.parseFloat(pre);
             newConf.setPrecio(precio);
-            
-            //int id = 1000 * conf.getInt("velocidadcpu") + 100 * conf.getInt("capacidadram") + 10 * conf.getInt("capacidaddd") 
-                    //+ conf.getInt("velocidadtarjetagrafica") + conf.getInt("memoriatarjetagrafica");
-            //newConf.setIdconfiguracion(16);
             List<Pedidopc> lista = new ArrayList<>();
-            newConf.setPedidopcList(lista);
-            
-            //newConf.setTipocpu("1");
-            //newConf.setVelocidadcpu(5);
-            //newConf.setCapacidaddd(5);
-            //newConf.setCapacidadram(5);
-            //newConf.setVelocidadtarjetagrafica(5);
-            //newConf.setPrecio(0);
-            //newConf.setMemoriatarjetagrafica(5);
-            
+            newConf.setPedidopcList(lista);     
             configuracionpcFacade.create(newConf);
             respuesta.status(Response.Status.NO_CONTENT);
             return respuesta.build();

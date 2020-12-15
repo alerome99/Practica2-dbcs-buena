@@ -1,4 +1,4 @@
-import { Component, OnInit, SystemJsNgModuleLoader } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Configuracionpc, Conversion, Pais, Usuario } from '../shared/app.model';
@@ -17,6 +17,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AddNuevaComponent implements OnInit {
   private data:any = [];
+  private verbose:number;
   constructor(
     private clienteApiRest: ClienteApiRestService,
     private datos: DataService,
@@ -26,13 +27,11 @@ export class AddNuevaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('En editar');
-    console.log(this.ruta.snapshot.url[this.ruta.snapshot.url.length - 1].path);
+    this.verbose = 0;
     this.operacion = this.ruta.snapshot.url[
       this.ruta.snapshot.url.length - 1
-    ].path; // Operacion: ultimo string de la URL
+    ].path;
     if (this.operacion == 'editar') {
-      // Si la operacion es editar se captura el id del registro y se trae el json con el vino
       console.log('En Editar');
       this.ruta.paramMap.subscribe(
         (params) => {
@@ -50,6 +49,8 @@ export class AddNuevaComponent implements OnInit {
           throw err;
         }
       );
+    }else{
+      console.log('En añadir');
     }
     this.getPais();
   }
@@ -72,22 +73,11 @@ export class AddNuevaComponent implements OnInit {
     capacidaddd: 0,
     velocidadtarjetagrafica: 0,
     memoriatarjetagrafica: 0,
-    precio: 0.0,
+    precio: 0.0
   };
 
   f = {
-    factor: 0
-  }
-
-  user = {
-    nifcif:'',
-    nombre:'',
-    direccionpostal:'',
-    ciudad:'',
-    pais:'',
-    direccionelectronica:'',
-    telefono:'',
-    password:''
+    dineroconvertido: 0
   }
 
   p = {
@@ -96,26 +86,30 @@ export class AddNuevaComponent implements OnInit {
 
   conversion = this.f as Conversion;
   pa = this.p as Pais;
-  usuario = this.user as Usuario;
   configuracion = this.conf as Configuracionpc;
   idconfiguracion: String;
   operacion: String;
-  onSubmit() {   
+  onSubmit() {
     console.log('Enviado formulario');
     if (this.idconfiguracion) {
+      if(this.conversion.dineroconvertido!=0){
+        this.configuracion.precio = this.conversion.dineroconvertido; 
+      }    
       this.clienteApiRest
         .modificarConfiguracion(
           String(this.configuracion.idconfiguracion),
-          this.configuracion, Number(this.conversion.factor)
+          this.configuracion
         )
         .subscribe(
           (resp) => {
             if (resp.status < 400) {
               this.datos.cambiarMostrarMensaje(true);
               this.datos.cambiarMensaje('Configuracion modificada con exito');
+              console.log(this.datos.mostrarMensajeActual);
             } else {
               this.datos.cambiarMostrarMensaje(true);
               this.datos.cambiarMensaje('Error al modificar configuracion');
+              console.log(this.datos.mostrarMensajeActual);
             }
             this.route.navigate(['configuraciones']); 
           },
@@ -124,19 +118,19 @@ export class AddNuevaComponent implements OnInit {
             throw err;
           }
         );
-    } else {
-      console.log("cambio " + this.pa.pais);
-      console.log("cambio2 " + this.configuracion.precio);
-      console.log("cambio3 " + this.conversion.factor);
-      
-      this.clienteApiRest.addConfiguracion(this.configuracion, Number(this.conversion.factor)).subscribe(
+    } else {  
+      this.configuracion.precio = this.conversion.dineroconvertido;    
+      this.clienteApiRest.addConfiguracion(this.configuracion).subscribe(
         (resp) => {
           if (resp.status < 400) {
             this.datos.cambiarMostrarMensaje(true);
             this.datos.cambiarMensaje('Configuracion añadida con exito');
+            console.log(this.datos.mostrarMensajeActual);
           } else {
             this.datos.cambiarMostrarMensaje(true);
             this.datos.cambiarMensaje('Error al añadir la configuracion');
+            this.configuracion.precio = 0;
+            console.log(this.datos.mostrarMensajeActual);
           }
           this.route.navigate(['configuraciones']);
         },
@@ -152,7 +146,7 @@ export class AddNuevaComponent implements OnInit {
     this.clienteApiRest.getPais().subscribe(
       (resp) => {
         this.pa.pais = JSON.parse(JSON.stringify(resp.body)).pais;
-        this.getCoeficiente(this.pa.pais);
+        console.log('Pais traido con exito: ' + this.pa.pais);
       },
       (err) => {
         console.log('Error al traer el pais: ' + err.message);          
@@ -160,6 +154,10 @@ export class AddNuevaComponent implements OnInit {
       }    
     );
     return null;
+  }
+
+  estadoIntermedio(){
+    this.getCoeficiente(this.pa.pais);
   }
   /** Selects all rows if they are not all selected; otherwise clear selection. */
   masterToggle() {
@@ -173,22 +171,32 @@ export class AddNuevaComponent implements OnInit {
     this.httpClient.get(url).subscribe((res) => {
       this.data = res;
       var ej = JSON.parse(JSON.stringify(res));
-      console.log(ej[0].currencies[0].code);
-      var currency = ej[0].currencies[0].code;
-
-      fetch(
-        'https://api.frankfurter.app/latest?amount=10&from=' +
-          currency +
-          '&to=USD'
-      )
+      var currency = ej[0].currencies[0].code
+      if(this.verbose==0){
+        console.log('Codigo de moneda traido con exito: ' + currency);     
+      }      
+      if(currency==='EUR'){
+        this.conversion.dineroconvertido = this.configuracion.precio;
+        this.verbose = 1;  
+      }else{
+        fetch(
+          'https://api.frankfurter.app/2020-01-01?to=' + currency
+        )
         .then((resp) => resp.json())
         .then((data) => {
-          this.conversion.factor = data.rates.USD/10;
-          console.log("dwdwqdwqdwqdwqdwqdwqdwqdwqdqwd" + this.conversion.factor);
+          if(this.verbose==0){
+            console.log('Factor de conversion traido con exito: ' + data.rates[currency]);
+          }
+          this.conversion.dineroconvertido = data.rates[currency] * this.configuracion.precio;
+          this.verbose = 1;
         }
         );
-         
+      }   
     });
+  }
+
+  cerrarSesion(){
+    this.clienteApiRest.cerrarSesion();
   }
 }
 

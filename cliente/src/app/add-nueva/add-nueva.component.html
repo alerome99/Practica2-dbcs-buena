@@ -1,6 +1,4 @@
 <body>
-  <!-- El atributo mensaje se usara para mostrar avisos al empleado, por ejemplo
-         el resultado de una operacion -->
   <h1>Bienvenido</h1>
   <form (ngSubmit)="onSubmit()" #confForm="ngForm">
     <fieldset class="form-group">
@@ -25,7 +23,7 @@
  [(ngModel)]="configuracion.memoriatarjetagrafica" name="memoriatarjetagrafica"><br /><br />
     Precio:
    <input type="number" step="0.01" class="form-control" [required]="idconfiguracion ? false : true"
- [(ngModel)]="configuracion.precio" name="precio"><br /><br />
+ [(ngModel)]="configuracion.precio" name="precio" (ngModelChange)="estadoIntermedio()"><br /><br />
     <h2>Tipo CPU</h2>
     <input type="radio" [(ngModel)]="configuracion.tipocpu" name="tipocpu" value="AMD" />AMD<br />
     <input type="radio" [(ngModel)]="configuracion.tipocpu" name="tipocpu" value="INTEL" checked />Intel<br />
@@ -36,6 +34,6 @@
       </div>
     </fieldset>
     <input type="reset" value="Vaciar" />
-    <input type="submit" value="Salir" name="envioSalir" /><br /><br />
-  </form>
+    <input type="submit" value="Cerrar Sesion" name="cerrarSesion" (click)="cerrarSesion()" [routerLink]="['login']"/><br /><br />
+  </form> 
 </body>

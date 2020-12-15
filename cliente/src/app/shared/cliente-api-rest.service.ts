@@ -13,12 +13,12 @@ export class ClienteApiRestService {
 
   constructor(private http: HttpClient) { }
 
-  getLogin(user: string, password: string): Observable<Login> {
+  getLogin(user: string, authorization: string): Observable<Login> {
     let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + user;
     this.usuario = user;
     return this.http.get<Login>(url, {
       headers: new HttpHeaders({
-        Password: password
+        Authorization: authorization
       })
     });
   }
@@ -28,13 +28,17 @@ export class ClienteApiRestService {
     return this.http.get<Pais>(url, { observe: 'response' });
   }
 
-  addConfiguracion(configuracionpc: Configuracionpc, f: Number): Observable<HttpResponse<any>> {
-    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + f;
+  cerrarSesion(){
+    this.usuario = null;
+  }
+
+  addConfiguracion(configuracionpc: Configuracionpc): Observable<HttpResponse<any>> {
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/';
     return this.http.post<Configuracionpc>(url, configuracionpc, { observe: 'response'});
   }
 
-  modificarConfiguracion(id: String, configuracionpc: Configuracionpc, f: Number): Observable<HttpResponse<any>> {
-    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + id + '/' + f;
+  modificarConfiguracion(id: String, configuracionpc: Configuracionpc): Observable<HttpResponse<any>> {
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + id;
     return this.http.put<Configuracionpc>(url, configuracionpc, { observe: 'response'});
   }
 

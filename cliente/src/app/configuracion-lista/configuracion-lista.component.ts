@@ -19,7 +19,7 @@ export class ConfiguracionListaComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    console.log('Dentro funcion ngOnInit de Listar');
+    console.log('Dentro de la funcion ngOnInit de lista configuraciones');
 
     this.datos.mostrarMensajeActual.subscribe(
       (valor) => (this.mostrarMensaje = valor)
@@ -30,7 +30,6 @@ export class ConfiguracionListaComponent implements OnInit {
     console.log('Valor actual del mensaje: ' + this.mensaje);
     this.clienteApiRest.getAllConfiguraciones().subscribe(
       (resp: Configuracionpc[]) => {
-        console.log('datos: ' + resp);
       },
       (err) => {
         console.log('Error al traer la lista: ' + err.message);
@@ -42,10 +41,9 @@ export class ConfiguracionListaComponent implements OnInit {
   getConfiguracion_AccesoResponse() {
     this.clienteApiRest.getConfiguraciones_AccesoResponse().subscribe(
       (resp) => {
-        console.log('Cabeceras: ' + resp.headers.keys());
-        console.log('Status: ' + resp.status);
         if (resp.status < 400) {
           this.Configuraciones = resp.body; // se accede al cuerpo de la respuesta
+          console.log('Lista traida con exito');
         } else {
           this.mensaje = 'Error al acceder a los datos';
           this.mostrarMensaje = true;
@@ -62,12 +60,12 @@ export class ConfiguracionListaComponent implements OnInit {
     this.clienteApiRest.borrarConfiguracion(id.toString()).subscribe(
       (resp) => {
         if (resp.status < 400) {
-          this.mostrarMensaje = true; // actualizamos variable compartida
-          this.mensaje = 'Registro borrado con exito'; // actualizamos variable compartida
-          this.getConfiguracion_AccesoResponse(); //Actualizamos la lista de vinos en la vista
+          this.mostrarMensaje = true; 
+          console.log('Configuracion eliminada con exito'); 
+          this.getConfiguracion_AccesoResponse(); 
         } else {
           this.mostrarMensaje = true;
-          this.mensaje = 'Error al eliminar registro';
+          console.log('Error al eliminar registro');
         }
       },
       (err) => {
@@ -75,5 +73,10 @@ export class ConfiguracionListaComponent implements OnInit {
         throw err;
       }
     );
+  }
+
+  cerrarSesion(){
+    this.clienteApiRest.cerrarSesion();
+    console.log('sesion cerrado con exito');
   }
 }
