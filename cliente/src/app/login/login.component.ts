@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ClienteApiRestService } from '../shared/cliente-api-rest.service';
-import { Usuario } from '../shared/app.model';
+import { ErrorM, Usuario } from '../shared/app.model';
 import { DataService } from '../shared/data.service';
 import { Router } from '@angular/router';
 
@@ -13,6 +13,7 @@ export class LoginComponent implements OnInit {
   User: Usuario ;
   mostrarMensaje: boolean ;
   mensaje: string ;
+  mensajeError: string = "";
 
   constructor(
     private clienteApiRest: ClienteApiRestService,
@@ -22,7 +23,6 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('Dentro funcion ngOnInit de login');
-
     this.datos.mostrarMensajeActual.subscribe(
       (valor) => (this.mostrarMensaje = valor)
     );
@@ -31,6 +31,11 @@ export class LoginComponent implements OnInit {
     this.datos.mensajeActual.subscribe((valor) => (this.mensaje = valor));
     console.log('Valor actual del mensaje: ' + this.mensaje);
   }
+  er = {
+    mensajeErr:true
+  }
+
+  error = this.er as ErrorM;
   onSubmit() {
     let nifcif = (document.getElementById('nif') as HTMLInputElement).value;
     let pass = (document.getElementById('pass') as HTMLInputElement).value;
@@ -44,6 +49,7 @@ export class LoginComponent implements OnInit {
       },
       err => {
         console.log('Usuario incorrecto: ' + err.message);
+        this.mensajeError = "Usuario o contraseña incorrectos";
         throw err;
       }
     );

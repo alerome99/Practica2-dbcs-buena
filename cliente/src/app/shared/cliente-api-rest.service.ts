@@ -33,12 +33,12 @@ export class ClienteApiRestService {
   }
 
   addConfiguracion(configuracionpc: Configuracionpc): Observable<HttpResponse<any>> {
-    let url = ClienteApiRestService.BASE_URI + '/ordenadores/';
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + 'add';
     return this.http.post<Configuracionpc>(url, configuracionpc, { observe: 'response'});
   }
 
   modificarConfiguracion(id: String, configuracionpc: Configuracionpc): Observable<HttpResponse<any>> {
-    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + id;
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/' + id + '/editar';
     return this.http.put<Configuracionpc>(url, configuracionpc, { observe: 'response'});
   }
 
@@ -48,7 +48,7 @@ export class ClienteApiRestService {
   }
 
   getConfiguraciones_AccesoResponse(): Observable<HttpResponse<Configuracionpc[]>> {
-    let url = ClienteApiRestService.BASE_URI + '/ordenadores';
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/configuraciones';
     return this.http.get<Configuracionpc[]>(url, { observe: 'response' });
   }
 
@@ -59,7 +59,7 @@ export class ClienteApiRestService {
 
   getAllConfiguraciones() {
     //console.log("dentro de getAllVInos");
-    let url = ClienteApiRestService.BASE_URI + '/ordenadores';
+    let url = ClienteApiRestService.BASE_URI + '/ordenadores/configuraciones';
     return this.http.get<Configuracionpc[]>(url);
   }
 

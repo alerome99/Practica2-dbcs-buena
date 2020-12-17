@@ -62,6 +62,7 @@ public class OrdenadoresResource implements ContainerResponseFilter{
      * @return an instance of java.lang.String
      */
     
+    @Path("/configuraciones")
     @GET
     @Produces("application/json")
     public Response getConfiguraciones() {
@@ -128,7 +129,7 @@ public class OrdenadoresResource implements ContainerResponseFilter{
         }
     }
     
-    @Path("{id}")
+    @Path("{id}/editar")
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public Response modificarConfiguracion(JsonObject confModif, @PathParam("id") int id) {
@@ -155,6 +156,7 @@ public class OrdenadoresResource implements ContainerResponseFilter{
         }
     }
     
+    @Path("/add")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addConfiguracionpc(JsonObject conf) {

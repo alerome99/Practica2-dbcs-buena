@@ -18,6 +18,7 @@ import { HttpClient } from '@angular/common/http';
 export class AddNuevaComponent implements OnInit {
   private data:any = [];
   private verbose:number;
+  mensajeError: string = "";
   constructor(
     private clienteApiRest: ClienteApiRestService,
     private datos: DataService,
@@ -109,11 +110,13 @@ export class AddNuevaComponent implements OnInit {
             } else {
               this.datos.cambiarMostrarMensaje(true);
               this.datos.cambiarMensaje('Error al modificar configuracion');
+              this.mensajeError = "Error al modificar configuracion";
               console.log(this.datos.mostrarMensajeActual);
             }
             this.route.navigate(['configuraciones']); 
           },
           (err) => {
+            this.mensajeError = "Error al modificar configuracion";
             console.log('Error editar: ' + err.message);
             throw err;
           }
@@ -129,12 +132,14 @@ export class AddNuevaComponent implements OnInit {
           } else {
             this.datos.cambiarMostrarMensaje(true);
             this.datos.cambiarMensaje('Error al añadir la configuracion');
+            this.mensajeError="Error al añadir la configuracion";
             this.configuracion.precio = 0;
             console.log(this.datos.mostrarMensajeActual);
           }
           this.route.navigate(['configuraciones']);
         },
         (err) => {
+          this.mensajeError="Error al añadir la configuracion";
           console.log('Error al añadir: ' + err.message);
           throw err;
         }

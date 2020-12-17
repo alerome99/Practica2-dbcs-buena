@@ -61,3 +61,7 @@ export interface Pais{
 export interface Conversion{
     dineroconvertido:number
 }
+
+export interface ErrorM{
+    mensajeErr:boolean
+}
